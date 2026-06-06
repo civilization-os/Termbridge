@@ -28,7 +28,11 @@ Manually confirm the MCP server can start:
 node dist/mcp/server.js
 ```
 
-This is a stdio MCP server, so it will wait for a client connection. Press `Ctrl-C` to stop it.
+This is a stdio MCP server. It waits while stdin is open, and exits normally
+when stdin closes. Press `Ctrl-C` to stop it in an interactive shell. For
+development without building, use `pnpm --silent mcp`; do not configure Claude
+Desktop with plain `pnpm mcp`, because pnpm writes its script banner to stdout
+and stdout is reserved for MCP JSON-RPC messages.
 
 ## Configure Claude Desktop
 
@@ -219,6 +223,9 @@ If Claude does not show TermBridge tools:
 - Confirm `claude_desktop_config.json` is valid JSON.
 - Use absolute paths in `args`.
 - Run `node /ABS/PATH/Termbridge/dist/mcp/server.js` manually to catch startup errors.
+- If you start the server through pnpm during development, use `pnpm --silent mcp`.
+  Plain `pnpm mcp` prints pnpm lifecycle output to stdout and can break the MCP
+  stdio protocol.
 - Check Claude MCP logs.
 
 macOS logs:

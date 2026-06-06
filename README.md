@@ -169,10 +169,10 @@ try {
 
 ## MCP Server
 
-Run the MCP server over stdio:
+Run the MCP server over stdio for local development:
 
 ```bash
-pnpm mcp
+pnpm --silent mcp
 ```
 
 After build:
@@ -186,6 +186,12 @@ The package also exposes a binary:
 ```bash
 termbridge-mcp
 ```
+
+Stdio MCP servers exit when their stdin closes. If you run the command from a
+non-interactive shell without an MCP client attached, it may start and then exit
+with code 0. When configuring an MCP client, prefer `node dist/mcp/server.js` or
+the `termbridge-mcp` binary after build; avoid `pnpm mcp` because pnpm writes its
+lifecycle banner to stdout, which can corrupt the MCP stdio protocol.
 
 Registered MCP tools include:
 
@@ -314,7 +320,7 @@ Useful scripts:
 
 ```bash
 pnpm dev --help
-pnpm mcp
+pnpm --silent mcp
 pnpm docker:ssh
 pnpm docker:ssh:stop
 ```
