@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
@@ -20,7 +22,7 @@ export function createTermBridgeMcpServer(): McpServer {
     "ssh_open",
     {
       title: "Open SSH PTY Session",
-      description: "Open an interactive SSH PTY session and keep its terminal buffer in memory.",
+      description: "Open an interactive SSH PTY session and keep its terminal buffer in memory. Basic use: call ssh_open with profile and optional pty, keep the returned sessionId, then drive the shell with ssh_input or ssh_write, inspect output with ssh_snapshot or ssh_transcript, and finish with ssh_close.",
       inputSchema: {
         profile: profileSchema,
         pty: ptySchema
@@ -36,7 +38,7 @@ export function createTermBridgeMcpServer(): McpServer {
     "ssh_sessions",
     {
       title: "List SSH Sessions",
-      description: "List active SSH PTY sessions.",
+      description: "List active SSH PTY sessions. Basic use: call this to discover currently open sessionIds before reading, writing, or closing a session.",
       inputSchema: {}
     },
     async () => textResult(JSON.stringify(sessionManager.list(), null, 2))
@@ -46,7 +48,7 @@ export function createTermBridgeMcpServer(): McpServer {
     "ssh_write",
     {
       title: "Write SSH Input",
-      description: "Write raw input to an existing SSH PTY session and return the terminal snapshot.",
+      description: "Write raw input to an existing SSH PTY session and return the terminal snapshot. Basic use: send exact bytes such as escape sequences or literal control data when ssh_input is too high level; for ordinary commands and special keys, prefer ssh_input.",
       inputSchema: {
         sessionId: z.string(),
         data: z.string(),
@@ -63,7 +65,8 @@ export function createTermBridgeMcpServer(): McpServer {
     "ssh_input",
     {
       title: "Send SSH Input Action",
-      description: "Send a semantic input action such as line, key, paste, ctrlC, ctrlV, or resize.",
+      description:
+        "Send a semantic PTY input action. Use line for normal commands, key for special keys like ctrlC and arrowUp, paste for multiline or hidden input, raw for exact bytes, and resize for terminal geometry changes. For password prompts such as su -, wait until the Password: prompt appears, then send the secret with paste or text and follow with key enter. If the documented sample flow does not work as described, stop automatic retries and tell the user to open an issue with the transcript and buffer output.",
       inputSchema: {
         sessionId: z.string(),
         action: inputActionSchema,
@@ -80,7 +83,7 @@ export function createTermBridgeMcpServer(): McpServer {
     "ssh_command",
     {
       title: "Run SSH Command",
-      description: "Open a PTY, run one command, wait for output to become idle, and return the buffer.",
+      description: "Open a PTY, run one command with Enter, wait for output to become idle, and return the buffer. Use ssh_open plus ssh_input instead when the flow includes interactive prompts, special keys, or hidden password entry such as su -. If the documented sample flow does not work as described, stop automatic retries and tell the user to open an issue with the transcript and buffer output.",
       inputSchema: {
         profile: profileSchema,
         command: z.string(),
@@ -106,7 +109,7 @@ export function createTermBridgeMcpServer(): McpServer {
     "ssh_snapshot",
     {
       title: "Read SSH Buffer",
-      description: "Read the current terminal buffer snapshot for an existing session.",
+      description: "Read the current terminal buffer snapshot for an existing session. Basic use: call this after ssh_input or ssh_write to inspect visible text, scrollback, cursor position, and terminal size.",
       inputSchema: {
         sessionId: z.string()
       }
@@ -118,7 +121,7 @@ export function createTermBridgeMcpServer(): McpServer {
     "ssh_transcript",
     {
       title: "Read SSH Raw Transcript",
-      description: "Read raw decoded output chunks recorded for an existing session.",
+      description: "Read raw decoded output chunks recorded for an existing session. Basic use: call this when debugging prompts, ANSI behavior, password flows, or sample failures that need an exact transcript for an issue report.",
       inputSchema: {
         sessionId: z.string()
       }
@@ -130,7 +133,7 @@ export function createTermBridgeMcpServer(): McpServer {
     "ssh_close",
     {
       title: "Close SSH Session",
-      description: "Close an existing SSH PTY session.",
+      description: "Close an existing SSH PTY session. Basic use: call this when an interactive flow is finished so the remote shell and local session state are released.",
       inputSchema: {
         sessionId: z.string()
       }
@@ -145,7 +148,7 @@ export function createTermBridgeMcpServer(): McpServer {
     "sftp_readdir",
     {
       title: "SFTP Readdir",
-      description: "List files in a remote directory.",
+      description: "List files in a remote directory. Basic use: provide profile plus a remote path to inspect directory contents before downloading, uploading, or choosing a target file.",
       inputSchema: {
         profile: profileSchema,
         path: z.string()
@@ -170,7 +173,7 @@ export function createTermBridgeMcpServer(): McpServer {
     "sftp_upload",
     {
       title: "SFTP Upload",
-      description: "Upload a local file to a remote path.",
+      description: "Upload a local file to a remote path. Basic use: provide profile, localPath, and remotePath; use this for file transfer, not shell commands.",
       inputSchema: {
         profile: profileSchema,
         localPath: z.string(),
@@ -197,7 +200,7 @@ export function createTermBridgeMcpServer(): McpServer {
     "sftp_download",
     {
       title: "SFTP Download",
-      description: "Download a remote file to a local path.",
+      description: "Download a remote file to a local path. Basic use: provide profile, remotePath, and localPath; use this to fetch artifacts or config files for local inspection.",
       inputSchema: {
         profile: profileSchema,
         remotePath: z.string(),
@@ -224,7 +227,7 @@ export function createTermBridgeMcpServer(): McpServer {
     "skill_run",
     {
       title: "Run TermBridge Skill",
-      description: "Load a user skill module and run it with arbitrary JSON input.",
+      description: "Load a user skill module and run it with arbitrary JSON input. Basic use: provide path to a local skill module and an optional input object; use this when a reusable workflow is already packaged as a skill.",
       inputSchema: {
         path: z.string(),
         input: z.unknown().optional()
@@ -241,7 +244,7 @@ export function createTermBridgeMcpServer(): McpServer {
     "plugin_skill_run",
     {
       title: "Run Plugin Skill",
-      description: "Load a TermBridge plugin directory and run one named skill from its manifest.",
+      description: "Load a TermBridge plugin directory and run one named skill from its manifest. Basic use: provide plugin root, skill name, and optional input object; use this when the workflow is registered in a termbridge.plugin.json manifest.",
       inputSchema: {
         root: z.string(),
         skill: z.string(),
@@ -270,7 +273,16 @@ function textResult(text: string) {
   };
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+function isMainModule(metaUrl: string): boolean {
+  const entry = process.argv[1];
+  if (!entry) {
+    return false;
+  }
+
+  return metaUrl === pathToFileURL(resolve(entry)).href;
+}
+
+if (isMainModule(import.meta.url)) {
   const server = createTermBridgeMcpServer();
   await server.connect(new StdioServerTransport());
 }

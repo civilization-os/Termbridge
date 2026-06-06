@@ -102,6 +102,17 @@ Interactive PTY example:
 Open an SSH session with termbridge, run top, wait until the buffer contains PID or COMMAND, read the current screen, then send q to exit.
 ```
 
+Special keys and hidden input:
+
+```text
+Use termbridge ssh_input with action = { type: "key", key: "ctrlC" } to stop a running command.
+Use termbridge ssh_input with action = { type: "key", key: "arrowUp" } to recall shell history.
+Use termbridge ssh_input with action = { type: "paste", text: "line1\nline2" } to send multiline input.
+For su -, first send action = { type: "line", text: "su -" }, wait until the buffer shows Password:, then send action = { type: "paste", text: "the-secret", bracketed: false } and finally action = { type: "key", key: "enter" }.
+Password input may not echo to the terminal. That is expected; confirm by waiting for the next prompt or checking the resulting buffer.
+If a documented sample flow still fails when followed exactly, stop automatic retries, show the user the transcript or terminal buffer, and ask them to open a GitHub issue with the reproduction steps.
+```
+
 ## Available MCP Tools
 
 TermBridge currently registers:
@@ -119,6 +130,29 @@ TermBridge currently registers:
 - `sftp_download`
 - `skill_run`
 - `plugin_skill_run`
+
+Basic usage by method:
+
+- `ssh_open`: start an interactive shell, keep the returned `sessionId`, then use `ssh_input` or `ssh_write`.
+- `ssh_sessions`: list current `sessionId` values before reconnecting to an existing session.
+- `ssh_write`: send exact raw bytes to a session. Use this for literal escape sequences; prefer `ssh_input` for normal work.
+- `ssh_input`: send semantic input such as `line`, `key`, `paste`, `raw`, or `resize`. Use this for commands, control keys, arrow keys, and hidden password prompts.
+- `ssh_command`: run one command and wait for idle output. Use this for non-interactive commands like `whoami`, `pwd`, or `ls -la`.
+- `ssh_snapshot`: read the current visible buffer and scrollback for a session.
+- `ssh_transcript`: read the raw transcript when debugging ANSI output, prompts, or sample failures.
+- `ssh_close`: close an interactive session when done.
+- `sftp_readdir`: list remote directory contents.
+- `sftp_upload`: copy a local file to the remote host.
+- `sftp_download`: copy a remote file to the local machine.
+- `skill_run`: run a standalone local skill module by file path.
+- `plugin_skill_run`: run a named skill from a plugin manifest.
+
+Method selection rules:
+
+- Use `ssh_command` for single non-interactive commands.
+- Use `ssh_open` plus `ssh_input` for anything interactive, including `top`, shells, menus, arrow keys, `ctrlC`, or `su -`.
+- Use `ssh_transcript` and `ssh_snapshot` when a documented sample does not behave as expected.
+- If a documented sample still fails when followed exactly, stop automatic retries and ask the user to open a GitHub issue with the transcript, snapshot, and reproduction steps.
 
 ## Add a Skill Task
 
