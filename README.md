@@ -203,6 +203,8 @@ Registered MCP tools include:
 - `skill_run`
 - `plugin_skill_run`
 
+For Claude Desktop setup and skill task examples, see [docs/claude-mcp.md](docs/claude-mcp.md).
+
 ## Skills
 
 A skill is a user-owned module that composes SSH, SFTP, buffers, and prompts into a business flow.
