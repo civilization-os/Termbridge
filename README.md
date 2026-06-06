@@ -209,7 +209,7 @@ Registered MCP tools include:
 - `skill_run`
 - `plugin_skill_run`
 
-For Claude Desktop setup and skill task examples, see [docs/claude-mcp.md](docs/claude-mcp.md).
+For Claude CLI setup and skill task examples, see [docs/claude-mcp.md](docs/claude-mcp.md).
 
 ## Skills
 

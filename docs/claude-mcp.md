@@ -1,8 +1,6 @@
-# Use TermBridge with Claude Desktop MCP
+# Use TermBridge with Claude CLI MCP
 
-This guide covers the path from cloning the repository to configuring Claude Desktop as an MCP client, then adding a custom skill task.
-
-Claude Desktop local MCP servers are configured through `claude_desktop_config.json` with a `command` and `args` entry. See the official MCP local server guide for current platform paths and troubleshooting: https://modelcontextprotocol.io/docs/develop/connect-local-servers
+This guide covers the path from cloning the repository to configuring Claude CLI as an MCP client, then adding a custom skill task.
 
 ## Clone and Build
 
@@ -31,56 +29,51 @@ node dist/mcp/server.js
 This is a stdio MCP server. It waits while stdin is open, and exits normally
 when stdin closes. Press `Ctrl-C` to stop it in an interactive shell. For
 development without building, use `pnpm --silent mcp`; do not configure Claude
-Desktop with plain `pnpm mcp`, because pnpm writes its script banner to stdout
+CLI with plain `pnpm mcp`, because pnpm writes its script banner to stdout
 and stdout is reserved for MCP JSON-RPC messages.
 
-## Configure Claude Desktop
+## Configure Claude CLI
 
-Open the Claude Desktop config file.
+Claude CLI supports MCP server management through `claude mcp`.
 
-macOS:
+Linux or macOS:
 
-```text
-~/Library/Application Support/Claude/claude_desktop_config.json
+```bash
+claude mcp add --transport stdio termbridge -- \
+  node /ABS/PATH/Termbridge/dist/mcp/server.js
 ```
 
-Windows:
+If you are already in the repository root after `pnpm build`, this also works:
 
-```text
-%APPDATA%\Claude\claude_desktop_config.json
+```bash
+claude mcp add --transport stdio termbridge -- \
+  node "$(pwd)/dist/mcp/server.js"
 ```
 
-Add TermBridge under `mcpServers`:
+Windows PowerShell:
 
-```json
-{
-  "mcpServers": {
-    "termbridge": {
-      "command": "node",
-      "args": [
-        "/ABS/PATH/Termbridge/dist/mcp/server.js"
-      ]
-    }
-  }
-}
+```powershell
+claude mcp add --transport stdio termbridge -- `
+  node "$PWD\dist\mcp\server.js"
 ```
 
-Replace `/ABS/PATH/Termbridge` with the real absolute path, for example:
+Windows with an explicit absolute path:
 
-```json
-{
-  "mcpServers": {
-    "termbridge": {
-      "command": "node",
-      "args": [
-        "/Users/you/dev/Termbridge/dist/mcp/server.js"
-      ]
-    }
-  }
-}
+```powershell
+claude mcp add --transport stdio termbridge -- `
+  node "C:\ABS\PATH\Termbridge\dist\mcp\server.js"
 ```
 
-Fully quit and restart Claude Desktop after saving the config.
+Verify the server was added:
+
+```bash
+claude mcp get termbridge
+claude mcp list
+```
+
+Inside Claude CLI, use `/mcp` to inspect connection status and available tools.
+
+Do not use `pnpm mcp` in Claude CLI config. `pnpm` writes its lifecycle banner to stdout, and MCP stdio requires stdout to contain only protocol messages.
 
 ## Verify in Claude
 
@@ -217,15 +210,20 @@ input = {
 
 ## Troubleshooting
 
-If Claude does not show TermBridge tools:
+If Claude CLI does not show TermBridge tools:
 
-- Restart Claude Desktop completely.
-- Confirm `claude_desktop_config.json` is valid JSON.
-- Use absolute paths in `args`.
+- Restart the client completely.
+- Use an absolute path in the configured `node /ABS/PATH/Termbridge/dist/mcp/server.js` command.
 - Run `node /ABS/PATH/Termbridge/dist/mcp/server.js` manually to catch startup errors.
 - If you start the server through pnpm during development, use `pnpm --silent mcp`.
   Plain `pnpm mcp` prints pnpm lifecycle output to stdout and can break the MCP
   stdio protocol.
+- If Claude CLI reports an MCP connection error such as `32000`, first check
+  whether the configured command is `pnpm mcp`. Replace it with
+  `node /ABS/PATH/Termbridge/dist/mcp/server.js` or re-add it with
+  `claude mcp add --transport stdio termbridge -- node /ABS/PATH/Termbridge/dist/mcp/server.js`.
+- In Claude CLI, run `claude mcp get termbridge` and `/mcp` to inspect the
+  configured server and its live connection status.
 - Check Claude MCP logs.
 
 macOS logs:
