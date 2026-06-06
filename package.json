@@ -1,0 +1,46 @@
+{
+  "name": "@civilization-os/termbridge",
+  "version": "0.1.0",
+  "description": "TermBridge is a TypeScript SSH/SFTP toolkit with real PTY terminal buffers, MCP tools, and user-defined skills/plugins.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "bin": {
+    "termbridge": "./dist/cli.js",
+    "termbridge-mcp": "./dist/mcp/server.js"
+  },
+  "exports": {
+    ".": "./dist/index.js",
+    "./mcp": "./dist/mcp/server.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/cli.ts",
+    "mcp": "tsx src/mcp/server.ts",
+    "docker:ssh": "bash scripts/docker-ssh-fixture.sh start",
+    "docker:ssh:stop": "bash scripts/docker-ssh-fixture.sh stop",
+    "test": "vitest run --exclude 'src/**/*.integration.test.ts'",
+    "test:integration": "bash scripts/docker-ssh-fixture.sh test",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@xterm/addon-serialize": "^0.14.0",
+    "@xterm/headless": "^6.0.0",
+    "commander": "^15.0.0",
+    "ssh2": "^1.17.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.34",
+    "@types/ssh2": "^1.15.5",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

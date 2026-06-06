@@ -1,0 +1,17 @@
+{
+  "name": "ops",
+  "version": "0.1.0",
+  "description": "Example TermBridge plugin with operational SSH workflows.",
+  "skills": [
+    {
+      "name": "run-command",
+      "path": "skills/run-command.mjs",
+      "description": "Run a command in a PTY and return the terminal buffer."
+    },
+    {
+      "name": "list-dir",
+      "path": "skills/list-dir.mjs",
+      "description": "List a remote directory through SFTP."
+    }
+  ]
+}
