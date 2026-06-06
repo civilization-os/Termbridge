@@ -5,7 +5,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6.svg)](https://www.typescriptlang.org/)
 [![Tests](https://img.shields.io/badge/tests-vitest-6e9f18.svg)](https://vitest.dev/)
 [![MCP](https://img.shields.io/badge/MCP-ready-444444.svg)](https://modelcontextprotocol.io/)
-[![License](https://img.shields.io/badge/license-UNLICENSED-lightgrey.svg)](#license)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 TypeScript SSH/SFTP toolkit with real PTY sessions, an Xshell-style terminal buffer, MCP tools, and user-owned skills/plugins.
 
@@ -332,4 +332,4 @@ src/mcp        MCP tool server
 
 ## License
 
-UNLICENSED. Pick an OSS or commercial license before publishing or distributing outside the owning project.
+MIT.

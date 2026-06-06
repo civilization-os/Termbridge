@@ -2,7 +2,7 @@
   "name": "@civilization-os/termbridge",
   "version": "0.1.0",
   "description": "TermBridge is a TypeScript SSH/SFTP toolkit with real PTY terminal buffers, MCP tools, and user-defined skills/plugins.",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "type": "module",
   "bin": {
     "termbridge": "./dist/cli.js",
